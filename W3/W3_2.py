@@ -61,6 +61,6 @@ def touch_page():
 if __name__ == "__main__":
     try:
         # debug=False → 자동 재실행 방지
-        app.run(host="0.0.0.0", port=5000, debug=False)
+        app.run(host="0.0.0.0", port=8080, debug=False)
     finally:
         GPIO.cleanup()
