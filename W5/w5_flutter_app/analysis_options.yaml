@@ -1,0 +1,18 @@
+linter:
+  rules:
+    - avoid_print
+    - prefer_const_constructors
+    - unnecessary_new
+    - lines_longer_than_80_chars
+    - prefer_single_quotes
+    - always_specify_types
+    - type_annotate_public_apis
+    - public_member_api_docs
+    - unnecessary_this
+    - prefer_final_fields
+    - prefer_is_empty
+    - prefer_contains
+    - prefer_equal_for_default_values
+    - avoid_types_on_closure_parameters
+    - avoid_annotating_with_dynamic
+    - prefer_trailing_comma
