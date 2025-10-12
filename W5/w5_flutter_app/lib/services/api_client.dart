@@ -72,4 +72,25 @@ class ApiClient {
       throw ApiException('GET /control failed: ${res.statusCode}');
     }
   }
+
+  Future<List<HistoryPoint>> fetchHistory(String metric) async {
+    final uri = Uri.parse('$baseUrl/history_data/$metric');
+    final res = await _http.get(uri);
+    if (res.statusCode == 200) {
+      final arr = json.decode(res.body) as List;
+      return arr
+          .map((e) => HistoryPoint(
+                dt: e['dt'] as String? ?? '',
+                value: (e['value'] as num?)?.toDouble(),
+              ))
+          .toList();
+    }
+    throw ApiException('GET /history_data/$metric failed: ${res.statusCode}');
+  }
+}
+
+class HistoryPoint {
+  final String dt;
+  final double? value;
+  const HistoryPoint({required this.dt, required this.value});
 }

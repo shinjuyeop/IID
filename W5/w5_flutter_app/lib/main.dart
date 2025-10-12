@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'services/api_client.dart';
+import 'pages/history_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -123,9 +124,33 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Temperature: \\${s?.temperature?.toStringAsFixed(1) ?? '--'} ℃'),
-                        Text('Humidity: \\${s?.humidity?.toStringAsFixed(1) ?? '--'} %'),
-                        Text('Distance: \\${s?.distance?.toStringAsFixed(1) ?? '--'} cm'),
+                        Text('Temperature: ${s?.temperature?.toStringAsFixed(1) ?? '--'} ℃'),
+                        Text('Humidity: ${s?.humidity?.toStringAsFixed(1) ?? '--'} %'),
+                        Text('Distance: ${s?.distance?.toStringAsFixed(1) ?? '--'} cm'),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            OutlinedButton(
+                              onPressed: () => Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => HistoryPage.temp()),
+                              ),
+                              child: const Text('온도 그래프/목록'),
+                            ),
+                            OutlinedButton(
+                              onPressed: () => Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => HistoryPage.humid()),
+                              ),
+                              child: const Text('습도 그래프/목록'),
+                            ),
+                            OutlinedButton(
+                              onPressed: () => Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => HistoryPage.dist()),
+                              ),
+                              child: const Text('거리 그래프/목록'),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),

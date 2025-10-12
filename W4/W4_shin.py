@@ -82,7 +82,7 @@ GPIO.setup(ECHO, GPIO.IN)
 TOUCH_PIN = 6
 GPIO.setup(TOUCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-dht = adafruit_dht.DHT11(board.D23)
+dht = adafruit_dht.DHT11(board.D23, use_pulseio=False)
 
 latest_temp = None
 latest_humid = None
@@ -110,18 +110,38 @@ def get_distance():
     distance = (pulse_end - pulse_start) * 17150
     return round(distance, 2)
 
+def _read_dht(max_retries: int = 3):
+    """DHT11 읽기 재시도. 성공 시 (t, h), 실패 시 (None, None) 반환"""
+    for _ in range(max_retries):
+        try:
+            t = dht.temperature
+            h = dht.humidity
+            if t is not None or h is not None:
+                return t, h
+        except RuntimeError:
+            # 흔한 타이밍/CRC 오류, 잠시 대기 후 재시도
+            time.sleep(0.2)
+        except Exception as e:
+            print("[DHT ERROR]", e)
+            break
+    return None, None
+
+
 def sensor_loop():
-    """2초마다 센서 갱신, 5초마다 DB 저장"""
+    """주기적으로 센서 갱신, 주기적 DB 저장"""
     global latest_temp, latest_humid, latest_dist, led_status, mode_auto
     t0 = time.time()
     while True:
         try:
-            t = dht.temperature
-            h = dht.humidity
-            d = get_distance()
-            if t is not None and h is not None:
+            # 온습도 (재시도 포함), 각각 독립 갱신
+            t, h = _read_dht()
+            if t is not None:
                 latest_temp = t
+            if h is not None:
                 latest_humid = h
+
+            # 거리
+            d = get_distance()
             latest_dist = d
 
             # Auto 제어
@@ -147,12 +167,11 @@ def sensor_loop():
                 db_insert(latest_temp, latest_humid, latest_dist)
                 t0 = time.time()
 
-        except RuntimeError:
-            pass
         except Exception as e:
             print("[ERROR]", e)
 
-        time.sleep(2)
+        # DHT11 권장 2초 이상 간격
+        time.sleep(2.2)
 
 def touch_loop():
     global mode_auto
