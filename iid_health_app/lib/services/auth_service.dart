@@ -24,6 +24,11 @@ class AuthService {
       final String userEmail = data['email'] ?? email; // fallback to sent email
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('email', userEmail);
+      // Store user name if provided by backend
+      final backendName = data['user_name'] ?? data['name'];
+      if (backendName is String && backendName.trim().isNotEmpty) {
+        await prefs.setString('user_name', backendName.trim());
+      }
       // 서버가 user_id를 반환하면 저장해둡니다. (예: { "user_id": 1, ... })
       if (data['user_id'] != null) {
         try {

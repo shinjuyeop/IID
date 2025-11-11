@@ -25,9 +25,10 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      accountName = prefs.getString('account_name');
-      accountEmail = prefs.getString('account_email');
-      serverEmail = prefs.getString('email');
+      final storedName = prefs.getString('user_name') ?? prefs.getString('account_name');
+      serverEmail = prefs.getString('email') ?? prefs.getString('account_email');
+      // Fallback: if name missing, derive from email prefix
+      accountName = storedName ?? (serverEmail != null ? serverEmail!.split('@').first : null);
       userId = prefs.getInt('user_id');
     });
   }
@@ -102,8 +103,7 @@ class _SettingsPageState extends State<SettingsPage> {
           const Text('계정 정보', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           _InfoRow(label: '이름', value: accountName ?? '-'),
-          _InfoRow(label: '이메일(가입)', value: accountEmail ?? '-'),
-          _InfoRow(label: '이메일(서버)', value: serverEmail ?? '-'),
+          _InfoRow(label: '이메일', value: serverEmail ?? '-'),
           _InfoRow(label: 'User ID', value: userId?.toString() ?? '-'),
           const SizedBox(height: 24),
           Row(

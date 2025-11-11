@@ -14,6 +14,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   final heightCtrl = TextEditingController();
   final weightCtrl = TextEditingController();
   final bodyFatCtrl = TextEditingController();
+  final purposeCtrl = TextEditingController();
+  final jobCtrl = TextEditingController();
   String? selectedGender;
   int? selectedAge;
 
@@ -44,7 +46,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       age: selectedAge!,
       bodyFat: bf,
       gender: selectedGender!,
-      purpose: '',
+      purpose: purposeCtrl.text.trim(),
+      job: jobCtrl.text.trim(),
     );
 
     if (!ok) {
@@ -56,8 +59,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     await prefs.setDouble('profile_height', h);
     await prefs.setDouble('profile_weight', w);
     await prefs.setDouble('profile_bodyfat', bf);
-    await prefs.setString('profile_gender', selectedGender!);
+  await prefs.setString('profile_gender', selectedGender!);
     await prefs.setInt('profile_age', selectedAge!);
+  await prefs.setString('profile_purpose', purposeCtrl.text.trim());
+  await prefs.setString('profile_job', jobCtrl.text.trim());
   // per-user profile completed flag
   await prefs.setBool('profile_completed_${userId}', true);
 
@@ -71,6 +76,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     heightCtrl.dispose();
     weightCtrl.dispose();
     bodyFatCtrl.dispose();
+    purposeCtrl.dispose();
+    jobCtrl.dispose();
     super.dispose();
   }
 
@@ -98,6 +105,16 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               controller: bodyFatCtrl,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(labelText: '체지방률 (%)'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: purposeCtrl,
+              decoration: const InputDecoration(labelText: '목표 (예: 체지방 10kg 감량)'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: jobCtrl,
+              decoration: const InputDecoration(labelText: '직업 (예: 사무직 개발자)'),
             ),
             const SizedBox(height: 12),
             // 성별 드롭다운

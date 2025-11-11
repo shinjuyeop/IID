@@ -39,10 +39,12 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       if (ok) {
-        // Optionally store basic info locally for convenience
+        // Store basic info locally for convenience and consistency with SettingsPage
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('account_name', name);
         await prefs.setString('account_email', email);
+        await prefs.setString('user_name', name); // for SettingsPage
+        await prefs.setString('email', email);    // for SettingsPage
 
         if (!mounted) return;
         Navigator.pop(context); // Back to login

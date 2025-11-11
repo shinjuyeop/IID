@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   shared_preferences: ^2.2.3
   http: ^1.2.2
+  # Calendar UI (using Flutter's built-in CalendarDatePicker so external lib not strictly needed)
+  # If later you want advanced features, consider: table_calendar: ^3.0.9
 
 dev_dependencies:
   flutter_test:
