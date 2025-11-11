@@ -109,7 +109,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             const SizedBox(height: 12),
             TextField(
               controller: purposeCtrl,
-              decoration: const InputDecoration(labelText: '목표 (예: 체지방 10kg 감량)'),
+              decoration: const InputDecoration(labelText: '목표 (예: 몸무게 10kg 감량)'),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -152,4 +152,3 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     );
   }
 }
-// 성별, 나이
