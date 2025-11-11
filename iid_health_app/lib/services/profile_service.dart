@@ -107,4 +107,17 @@ class ProfileService {
     final resp = await http.post(uri, headers: {'Content-Type': 'application/json'}, body: body);
     return resp.statusCode >= 200 && resp.statusCode < 300;
   }
+
+  static Future<bool> updateHeight({
+    required int userId,
+    required double heightCm,
+  }) async {
+    final uri = Uri.parse('${AppConfig.baseUrl}/profile/update');
+    final body = jsonEncode({
+      'user_id': userId,
+      'height_cm': heightCm,
+    });
+    final resp = await http.post(uri, headers: {'Content-Type': 'application/json'}, body: body);
+    return resp.statusCode >= 200 && resp.statusCode < 300;
+  }
 }

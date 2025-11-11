@@ -97,6 +97,32 @@ class _MyPageState extends State<MyPage> {
     );
   }
 
+  Future<void> _updateHeight() async {
+    await _editTextField(
+      title: '키 수정 (cm)',
+      initial: heightCm != null ? heightCm!.toStringAsFixed(1) : '',
+      onSaved: (val) async {
+        final d = double.tryParse(val);
+        if (d == null) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('숫자를 입력하세요.')));
+          return;
+        }
+        final prefs = await SharedPreferences.getInstance();
+        final userId = prefs.getInt('user_id');
+        if (userId == null) return;
+        final ok = await ProfileService.updateHeight(userId: userId, heightCm: d);
+        if (ok) {
+          await prefs.setDouble('profile_height', d);
+          setState(() => heightCm = d);
+        } else {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('키 업데이트 실패')));
+        }
+      },
+    );
+  }
+
   Future<void> _sendQuestion() async {
     final question = _qCtrl.text.trim();
     if (question.isEmpty) {
@@ -136,7 +162,11 @@ class _MyPageState extends State<MyPage> {
       children: [
         const Text('내 프로필', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-        _RowTile(label: '키', value: heightCm != null ? '${heightCm!.toStringAsFixed(1)} cm' : '-'),
+        _RowTile(label: '성별', value: gender ?? '-'),
+        InkWell(
+          onTap: _updateHeight,
+          child: _RowTile(label: '키', value: heightCm != null ? '${heightCm!.toStringAsFixed(1)} cm' : '-', tappable: true),
+        ),
         InkWell(
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WeightUpdatePage())).then((_) => _load()),
           child: _RowTile(label: '몸무게', value: weightKg != null ? '${weightKg!.toStringAsFixed(1)} kg' : '-', tappable: true),
@@ -145,7 +175,6 @@ class _MyPageState extends State<MyPage> {
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BodyFatUpdatePage())).then((_) => _load()),
           child: _RowTile(label: '체지방률', value: bodyFat != null ? '${bodyFat!.toStringAsFixed(1)} %' : '-', tappable: true),
         ),
-        _RowTile(label: '성별', value: gender ?? '-'),
         InkWell(
           onTap: _updatePurpose,
           child: _RowTile(label: '목표', value: (purpose?.isNotEmpty ?? false) ? purpose! : '-', tappable: true),
