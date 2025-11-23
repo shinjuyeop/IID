@@ -51,4 +51,53 @@ class MealsService {
       return null;
     }
   }
+
+  /// Load diet log for a specific user and date.
+  /// GET `${baseUrl}/diet/log?user_id=1&date=2025-11-15`
+  /// Returns a [_DietLog] or null on error / not found.
+  static Future<_DietLog?> loadDailyMeals({
+    required int userId,
+    required String date,
+  }) async {
+    final uri = Uri.parse('${AppConfig.baseUrl}/diet/log?user_id=$userId&date=$date');
+    try {
+      final resp = await http.get(uri);
+      if (resp.statusCode < 200 || resp.statusCode >= 300) return null;
+      final data = jsonDecode(resp.body);
+      if (data is! Map<String, dynamic>) return null;
+      final success = data['success'] == true;
+      if (!success) return null;
+      final log = data['log'];
+      if (log is! Map<String, dynamic>) return null;
+      return _DietLog.fromJson(log);
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
+class _DietLog {
+  final String date;
+  final String? breakfast;
+  final String? lunch;
+  final String? dinner;
+  final String? aiComment;
+
+  _DietLog({
+    required this.date,
+    this.breakfast,
+    this.lunch,
+    this.dinner,
+    this.aiComment,
+  });
+
+  factory _DietLog.fromJson(Map<String, dynamic> json) {
+    return _DietLog(
+      date: json['date'] as String? ?? '',
+      breakfast: json['breakfast'] as String?,
+      lunch: json['lunch'] as String?,
+      dinner: json['dinner'] as String?,
+      aiComment: json['ai_comment'] as String?,
+    );
+  }
 }

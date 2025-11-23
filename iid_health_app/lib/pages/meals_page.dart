@@ -45,8 +45,8 @@ class _MealsPageState extends State<MealsPage> {
     _breakfastCtrl.text = note?.breakfast ?? '';
     _lunchCtrl.text = note?.lunch ?? '';
     _dinnerCtrl.text = note?.dinner ?? '';
-    // Also try to load from persistent storage and apply when available.
-    _loadFromPrefsAndApply(key);
+    // Also try to load from backend and local storage.
+    _loadFromBackendAndPrefs(key);
   }
 
   void _saveCurrent() {
@@ -219,12 +219,44 @@ class _MealsPageState extends State<MealsPage> {
     if (!mounted) return;
     if (_ymd(_selectedDate) == _ymd(date)) {
       setState(() {
-    _breakfastCtrl.text = note.breakfast;
-    _lunchCtrl.text = note.lunch;
-    _dinnerCtrl.text = note.dinner;
-    _evaluation = ai; // may be null
+        _breakfastCtrl.text = note.breakfast;
+        _lunchCtrl.text = note.lunch;
+        _dinnerCtrl.text = note.dinner;
+        _evaluation = ai; // may be null
       });
     }
+  }
+
+  /// Backend + local 저장소에서 식단/AI 코멘트를 불러와 적용
+  Future<void> _loadFromBackendAndPrefs(DateTime date) async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id');
+    final keyStr = _dateKey(date);
+
+    // 1) 먼저 백엔드에서 조회 시도
+    if (userId != null) {
+      final log = await MealsService.loadDailyMeals(userId: userId, date: keyStr);
+      if (log != null && mounted && _ymd(_selectedDate) == _ymd(date)) {
+        setState(() {
+          _breakfastCtrl.text = log.breakfast ?? '';
+          _lunchCtrl.text = log.lunch ?? '';
+          _dinnerCtrl.text = log.dinner ?? '';
+          _evaluation = log.aiComment ?? _evaluation;
+        });
+
+        // 백업용으로 로컬에도 저장
+        await prefs.setString('meals_${keyStr}_b', _breakfastCtrl.text);
+        await prefs.setString('meals_${keyStr}_l', _lunchCtrl.text);
+        await prefs.setString('meals_${keyStr}_d', _dinnerCtrl.text);
+        if (_evaluation != null) {
+          await prefs.setString('meals_${keyStr}_evaluation', _evaluation!);
+        }
+        return;
+      }
+    }
+
+    // 2) 백엔드 실패 시 기존 로컬 저장값 사용
+    await _loadFromPrefsAndApply(date);
   }
 }
 
