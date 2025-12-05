@@ -42,6 +42,8 @@ class _MealsPageState extends State<MealsPage> {
   void _loadFor(DateTime date) {
     final key = _ymd(date);
     final note = _notesByDate[key];
+    // Reset evaluation by default when changing dates to avoid stale comments.
+    _evaluation = null;
     _breakfastCtrl.text = note?.breakfast ?? '';
     _lunchCtrl.text = note?.lunch ?? '';
     _dinnerCtrl.text = note?.dinner ?? '';
@@ -212,7 +214,15 @@ class _MealsPageState extends State<MealsPage> {
     final l = prefs.getString('meals_${key}_l');
     final d = prefs.getString('meals_${key}_d');
     final ai = prefs.getString('meals_${key}_evaluation');
-    if (b == null && l == null && d == null) return;
+    if (b == null && l == null && d == null) {
+      // No local data for this date; ensure evaluation is cleared if currently selected.
+      if (mounted && _ymd(_selectedDate) == _ymd(date)) {
+        setState(() {
+          _evaluation = null;
+        });
+      }
+      return;
+    }
 
     final note = _MealNotes(breakfast: b ?? '', lunch: l ?? '', dinner: d ?? '');
     _notesByDate[_ymd(date)] = note;
@@ -257,6 +267,7 @@ class _MealsPageState extends State<MealsPage> {
 
     // 2) 백엔드 실패 시 기존 로컬 저장값 사용
     await _loadFromPrefsAndApply(date);
+    // If neither backend nor prefs had data for this date, keep evaluation cleared.
   }
 }
 
